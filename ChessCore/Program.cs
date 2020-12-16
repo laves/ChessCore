@@ -327,22 +327,22 @@ class Program
         {
             ChessPieceColor.White => type switch
             {
-                ChessPieceType.King => "\x2654",
-                ChessPieceType.Queen => "\x2655",
-                ChessPieceType.Rook => "\x2656",
-                ChessPieceType.Bishop => "\x2657",
-                ChessPieceType.Knight => "\x2658",
-                ChessPieceType.Pawn => "\x2659",
+                ChessPieceType.King => "\u2654",
+                ChessPieceType.Queen => "\u2655",
+                ChessPieceType.Rook => "\u2656",
+                ChessPieceType.Bishop => "\u2657",
+                ChessPieceType.Knight => "\u2658",
+                ChessPieceType.Pawn => "\u2659",
                 _ => " "
             },
             ChessPieceColor.Black => type switch
             {
-                ChessPieceType.King => "\x265A",
-                ChessPieceType.Queen => "\x265B",
-                ChessPieceType.Rook => "\x265C",
-                ChessPieceType.Bishop => "\x265D",
-                ChessPieceType.Knight => "\x265E",
-                ChessPieceType.Pawn => "\x265F",
+                ChessPieceType.King => "\u265A",
+                ChessPieceType.Queen => "\u265B",
+                ChessPieceType.Rook => "\u265C",
+                ChessPieceType.Bishop => "\u265D",
+                ChessPieceType.Knight => "\u265E",
+                ChessPieceType.Pawn => "\u265F",
                 _ => " "
             },
             _ => " ",
