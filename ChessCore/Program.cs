@@ -22,7 +22,7 @@ class Program
 	private static void RunEngine()
 	{		
 		// init picovoice platform
-		string keywordPath = $"resources/keyword_files/{Platform}/picovoice_{Platform}.ppn";
+		string keywordPath = $"./resources/keyword_files/{Platform}/picovoice_{Platform}.ppn";
 		string contextPath = $"chess_{Platform}.rhn";
 
         static void wakeWordCallback()
