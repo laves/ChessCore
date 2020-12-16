@@ -9,9 +9,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="OpenTK" Version="4.3.0" />
+    <PackageReference Include="Picovoice" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ChessCoreEngine\ChessCoreEngine.csproj">
       <Project>{1861FDA3-D8F8-4479-B914-C78B777B93D5}</Project>
       <Name>ChessCoreEngine</Name>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="chess_windows.rhn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
