@@ -21,6 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="chess_linux.rhn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="chess_mac.rhn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="chess_windows.rhn">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
