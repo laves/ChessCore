@@ -15,7 +15,7 @@ class Program
 
 	static void Main(string[] args)
 	{
-		Console.OutputEncoding = Encoding.Unicode;
+		Console.OutputEncoding = Encoding.UTF8;
 		RunEngine();
 	}
 
