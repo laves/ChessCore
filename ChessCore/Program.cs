@@ -8,78 +8,25 @@ using Pv;
 
 class Program
 {
-	private static readonly Engine engine = new Engine();
-	private static string Platform => RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "mac" :
+	private static readonly Engine gameEngine = new Engine();
+	private static string _platform => RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "mac" :
 												 RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux" :
 												 RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "windows" : "";
+	private static bool _quitGame = false;
 
-	static void Main(string[] args)
+	static void Main(string[] _)
 	{
-		Console.OutputEncoding = Encoding.Unicode;
-		RunEngine();
+		Console.OutputEncoding = Encoding.UTF8;
+		RunGame();
 	}
 
-	private static void RunEngine()
+	private static void RunGame()
 	{		
 		// init picovoice platform
-		string keywordPath = $"./resources/keyword_files/{Platform}/picovoice_{Platform}.ppn";
-		string contextPath = $"chess_{Platform}.rhn";
+		string keywordPath = $"pico_chess_{_platform}.ppn";
+		string contextPath = $"chess_{_platform}.rhn";        
 
-        static void wakeWordCallback()
-		{			
-			Console.WriteLine("\nListening for command...");
-		}
-
-        static void inferenceCallback(Inference inference)
-		{
-			if (inference.IsUnderstood)
-			{ 
-				string cmd = inference.Intent.ToLower();
-				if (cmd.Equals("move"))
-				{
-					
-					string srcSide = inference.Slots["src_side"].ToLower();
-					string srcRank = inference.Slots["src_rank"].ToLower();
-					string srcFile = inference.Slots.ContainsKey("src_file") ? inference.Slots["src_file"].ToLower() : "";
-
-					string dstSide = inference.Slots["dst_side"].ToLower();
-					string dstRank = inference.Slots["dst_rank"].ToLower();
-					string dstFile = inference.Slots.ContainsKey("dst_file") ? inference.Slots["dst_file"].ToLower() : "";
-
-
-					string playerMove = MakePlayerMove(srcSide, srcFile, srcRank, dstSide, dstFile, dstRank);
-					if (playerMove.Equals("Invalid Move"))
-					{
-						Console.Clear();
-						Console.WriteLine();
-						Console.WriteLine($" {playerMove}");						
-						DrawBoard();
-					}
-					
-					string theirMove = MakeOpponentMove();
-					
-					Console.Clear();										
-					Console.WriteLine($" \x2654  {playerMove}");
-					Console.WriteLine($" \x265A  {theirMove}");					
-					DrawBoard();
-
-                    if (CheckEndGame())
-                    {
-						Console.WriteLine($"\n {GetEndGameReason()}");
-						Console.WriteLine($" Say 'new game' to play again.");	
-					}					
-				}
-			}
-			else
-			{
-				Console.Clear();
-				Console.WriteLine(" Didn't understand move.");
-				Console.WriteLine();
-				DrawBoard();								
-			}			
-		}
-
-		using Picovoice picovoice = new Picovoice(keywordPath, wakeWordCallback, contextPath, inferenceCallback);
+		using Picovoice picovoice = new Picovoice(keywordPath, WakeWordCallback, contextPath, InferenceCallback);
 
 		DrawBoard();
 
@@ -88,7 +35,7 @@ class Program
 		ALCaptureDevice captureDevice = ALC.CaptureOpenDevice(null, 16000, ALFormat.Mono16, picovoice.FrameLength * 2);
 		{
 			ALC.CaptureStart(captureDevice);
-			while (true)
+			while (!_quitGame)
 			{
 				int samplesAvailable = ALC.GetAvailableSamples(captureDevice);
 				if (samplesAvailable > picovoice.FrameLength)
@@ -100,31 +47,104 @@ class Program
 				Thread.Yield();
 			}
 
-			// stop and clean up resources
-			//Console.WriteLine("Stopping...");
-			//ALC.CaptureStop(captureDevice);
-			//ALC.CaptureCloseDevice(captureDevice);
-		}	
-
-
-	//			if (move == "new")
-	//			{
-	//				engine.NewGame();
-	//				continue;
-	//			}
-	//			if (move == "quit")
-	//			{
-	//				return;
-	//			}
-	//			if (move == "undo")
-	//			{
-	//				engine.Undo();
-	//				continue;
-	//			}
-
+            // stop and clean up resources
+            Console.WriteLine("Bye!");
+            ALC.CaptureStop(captureDevice);
+            ALC.CaptureCloseDevice(captureDevice);
+        }	
 	}
 
-	private static string MakePlayerMove(string srcSide, string srcFile, string srcRank, 
+	static void WakeWordCallback()
+	{
+		Console.WriteLine("\n Listening for command...");
+	}
+
+	static void InferenceCallback(Inference inference)
+	{
+		if (inference.IsUnderstood)
+		{
+			string cmd = inference.Intent;
+			if (cmd.Equals("move"))
+			{
+				string srcSide = inference.Slots["srcSide"];
+				string srcRank = inference.Slots["srcRank"];
+				string srcFile = inference.Slots.ContainsKey("srcFile") ? inference.Slots["srcFile"] : "";
+
+				string dstSide = inference.Slots["dstSide"];
+				string dstRank = inference.Slots["dstRank"];
+				string dstFile = inference.Slots.ContainsKey("dstFile") ? inference.Slots["dstFile"] : "";
+
+				string playerMove = MakePlayerMove(srcSide, srcFile, srcRank, dstSide, dstFile, dstRank);
+				if (playerMove.Equals("Invalid Move"))
+				{
+					Console.Clear();
+					Console.WriteLine();
+					Console.WriteLine($" {playerMove}");
+					DrawBoard();
+					return;
+				}
+
+				string theirMove = MakeOpponentMove();
+
+				Console.Clear();
+				Console.WriteLine($" \x2654  {playerMove}");
+				Console.WriteLine($" \x265A  {theirMove}");
+				DrawBoard();
+
+				if (CheckEndGame())
+				{
+					Console.WriteLine($"\n {GetEndGameReason()}");
+					Console.WriteLine($" Say 'new game' to play again.");
+				}
+			}
+			else if (cmd.Equals("undo"))
+			{
+				UndoLastMove();
+			}
+			else if (cmd.Equals("newgame"))
+			{
+				NewGame();
+			}
+			else if (cmd.Equals("quit"))
+			{
+				QuitGame();
+			}
+		}
+		else
+		{
+			Console.Clear();
+			Console.WriteLine(" Didn't understand move.");
+			Console.WriteLine();
+			DrawBoard();
+		}
+	}
+
+	static void NewGame()
+    {
+		gameEngine.NewGame();
+		Console.Clear();
+		Console.WriteLine(" New game started");
+		Console.WriteLine();
+		DrawBoard();
+	}
+
+	static void UndoLastMove()
+    {
+		gameEngine.Undo();
+		Console.Clear();
+		Console.WriteLine(" Last move undid");
+		Console.WriteLine();
+		DrawBoard();
+	}
+
+	static void QuitGame()
+    {
+		Console.Clear();
+		_quitGame = true;
+	}
+
+
+	static string MakePlayerMove(string srcSide, string srcFile, string srcRank, 
 		string dstSide, string dstFile, string dstRank)
     {
 		byte srcCol;
@@ -146,20 +166,20 @@ class Program
 			return "Invalid Move";
 		}
 
-		if (!engine.IsValidMove(srcCol, srcRow, dstCol, dstRow))
+		if (!gameEngine.IsValidMove(srcCol, srcRow, dstCol, dstRow))
 		{
 			return "Invalid Move";	
 		}
 
-		engine.MovePiece(srcCol, srcRow, dstCol, dstRow);
+		gameEngine.MovePiece(srcCol, srcRow, dstCol, dstRow);
 		return $"{GetColumn(srcCol)} {GetRow(srcRow)} -> {GetColumn(dstCol)} {GetRow(dstRow)}";
 	}
 
 	private static string MakeOpponentMove()
 	{
-		engine.AiPonderMove();
+		gameEngine.AiPonderMove();
 
-		MoveContent lastMove = engine.GetMoveHistory().ToArray()[0];
+		MoveContent lastMove = gameEngine.GetMoveHistory().ToArray()[0];
 
 		var srcCol = (byte)(lastMove.MovingPiecePrimary.SrcPosition % 8);
 		var srcRow = (byte)(lastMove.MovingPiecePrimary.SrcPosition / 8);
@@ -171,23 +191,23 @@ class Program
 
 	private static bool CheckEndGame()
     {
-		return engine.StaleMate || engine.GetWhiteMate() || engine.GetBlackMate();
+		return gameEngine.StaleMate || gameEngine.GetWhiteMate() || gameEngine.GetBlackMate();
 	}
 
 	private static string GetEndGameReason()
     {
-		if (engine.StaleMate)
+		if (gameEngine.StaleMate)
 		{
             string reason;
-            if (engine.InsufficientMaterial)
+            if (gameEngine.InsufficientMaterial)
 			{
 				reason = "1/2-1/2 {Draw by insufficient material}";
 			}
-			else if (engine.RepeatedMove)
+			else if (gameEngine.RepeatedMove)
 			{
 				reason = "1/2-1/2 {Draw by repetition}";
 			}
-			else if (engine.FiftyMove)
+			else if (gameEngine.FiftyMove)
 			{
 				reason = "1/2-1/2 {Draw by fifty move rule}";
 			}
@@ -195,17 +215,17 @@ class Program
 			{
 				reason = "1/2-1/2 {Stalemate}";
 			}
-			engine.NewGame();
+			gameEngine.NewGame();
 			return reason;
 		}
-		else if (engine.GetWhiteMate())
+		else if (gameEngine.GetWhiteMate())
 		{			
-			engine.NewGame();
+			gameEngine.NewGame();
 			return "0-1 {Black mates}";
 		}
-		else if (engine.GetBlackMate())
+		else if (gameEngine.GetBlackMate())
 		{			
-			engine.NewGame();
+			gameEngine.NewGame();
 			return "1-0 {White mates}";
 		}
 		else
@@ -305,8 +325,8 @@ class Program
 				Console.Write(" " + (8 - (i / 8)));
 			}
 
-			ChessPieceType PieceType = engine.GetPieceTypeAt(i);
-			ChessPieceColor PieceColor = engine.GetPieceColorAt(i);			
+			ChessPieceType PieceType = gameEngine.GetPieceTypeAt(i);
+			ChessPieceColor PieceColor = gameEngine.GetPieceColorAt(i);			
 			Console.Write($"| {GetPieceSymbol(PieceColor, PieceType)} ");
 
 			if (i % 8 == 7)
@@ -317,8 +337,13 @@ class Program
 
 		Console.WriteLine();
 		Console.WriteLine("  ---------------------------------  ");
-		Console.WriteLine("    QR  QN  QB   Q  K   KB  KN  KR");
+		Console.WriteLine("    QR  QN  QB  Q   K   KB  KN  KR");
 		Console.WriteLine();
+		Console.WriteLine(" Say 'PicoChess' followed by a command.\n Available commands are:");
+		Console.WriteLine("   - '(move) <src> (to) <dst>'");
+		Console.WriteLine("   - 'undo last move'");
+		Console.WriteLine("   - 'new game'");
+		Console.WriteLine("   - 'quit game'");
 	}
 
 	private static string GetPieceSymbol(ChessPieceColor color, ChessPieceType type)
