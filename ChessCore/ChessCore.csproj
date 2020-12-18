@@ -6,6 +6,7 @@
     <Version>1.0.1</Version>
     <Company>3583 Bytes</Company>
     <Authors>Adam Berent</Authors>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
