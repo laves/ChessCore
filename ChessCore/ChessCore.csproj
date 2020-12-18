@@ -2,16 +2,43 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Version>1.0.1</Version>
     <Company>3583 Bytes</Company>
     <Authors>Adam Berent</Authors>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTK" Version="4.4.0" />
+    <PackageReference Include="Picovoice" Version="1.1.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ChessCoreEngine\ChessCoreEngine.csproj">
       <Project>{1861FDA3-D8F8-4479-B914-C78B777B93D5}</Project>
       <Name>ChessCoreEngine</Name>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="chess_linux.rhn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="chess_mac.rhn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="chess_windows.rhn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="pico_chess_linux.ppn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="pico_chess_mac.ppn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="pico_chess_windows.ppn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

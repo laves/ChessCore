@@ -1,622 +1,367 @@
 ﻿using System;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
 using ChessEngine.Engine;
+using OpenTK.Audio.OpenAL;
+using Pv;
 
 class Program
 {
-
-	static void Main(string[] args)
-	{
-		RunEngine();
-	}
-
-	private static void RunEngine()
-	{
-		bool ShowBoard = false;
-
-		var engine = new Engine();
-
-
-
-		Console.WriteLine("Chess Core");
-		Console.WriteLine("Created by Adam Berent");
-		Console.WriteLine("Version: 1.0.1");
-		Console.WriteLine("");
-		Console.WriteLine("Type quit to exit");
-		Console.WriteLine("Type show to show board");
-		Console.WriteLine("");
-		Console.WriteLine("feature setboard=1");
-
-
-		while (true)
-		{
-			try
-			{
-				if (ShowBoard)
-				{
-					DrawBoard(engine);
-				}
-
-				if (engine.WhoseMove != engine.HumanPlayer)
-				{
-					MakeEngineMove(engine);
-				}
-				else
-				{
-					Console.WriteLine();
-
-					string move = Console.ReadLine();
-
-					if (String.IsNullOrEmpty(move))
-					{
-						continue;
-					}
-
-					move = move.Trim();
-
-
-					if (move == "new")
-					{
-						engine.NewGame();
-						continue;
-					}
-					if (move == "quit")
-					{
-						return;
-					}
-					if (move == "xboard")
-					{
-						continue;
-					}
-					if (move == "show")
-					{
-						ShowBoard = !ShowBoard;
-
-						continue;
-					}
-					if (move.StartsWith("edit"))
-					{
-						continue;
-					}
-					if (move == "hint")
-					{
-						continue;
-					}
-					if (move == "bk")
-					{
-						continue;
-					}
-					if (move == "undo")
-					{
-						engine.Undo();
-						continue;
-					}
-					if (move == "remove")
-					{
-						continue;
-					}
-					if (move == "remove")
-					{
-						continue;
-					}
-					if (move == "hard")
-					{
-						engine.GameDifficulty = Engine.Difficulty.Hard;
-						continue;
-					}
-					if (move == "easy")
-					{
-						continue;
-					}
-					if (move.StartsWith("accepted"))
-					{
-						continue;
-					}
-					if (move.StartsWith("rejected"))
-					{
-						continue;
-					}
-					if (move.StartsWith("variant"))
-					{
-						continue;
-					}
-					if (move == "random")
-					{
-						continue;
-					}
-					if (move == "force")
-					{
-						continue;
-					}
-					if (move == "go")
-					{
-						continue;
-					}
-					if (move == "playother")
-					{
-						if (engine.WhoseMove == ChessPieceColor.White)
-						{
-							engine.HumanPlayer = ChessPieceColor.Black;
-						}
-						else if (engine.WhoseMove == ChessPieceColor.Black)
-						{
-							engine.HumanPlayer = ChessPieceColor.White;
-						}
-
-						continue;
-					}
-					if (move == "white")
-					{
-						engine.HumanPlayer = ChessPieceColor.Black;
-
-						if (engine.WhoseMove != engine.HumanPlayer)
-						{
-							MakeEngineMove(engine);
-						}
-						continue;
-					}
-					if (move == "black")
-					{
-						engine.HumanPlayer = ChessPieceColor.White;
-
-						if (engine.WhoseMove != engine.HumanPlayer)
-						{
-							MakeEngineMove(engine);
-						}
-						continue;
-					}
-
-					if (move.StartsWith("level"))
-					{
-						continue;
-					}
-					if (move.StartsWith("st"))
-					{
-						continue;
-					}
-					if (move.StartsWith("sd"))
-					{
-						continue;
-					}
-					if (move.StartsWith("time"))
-					{
-						continue;
-					}
-					if (move.StartsWith("otim"))
-					{
-						continue;
-					}
-					if (move.StartsWith("otim"))
-					{
-						continue;
-					}
-					if (move == "?")
-					{
-						continue;
-					}
-					if (move.StartsWith("ping"))
-					{
-						if (move.IndexOf(" ") > 0)
-						{
-							string pong = move.Substring(move.IndexOf(" "), move.Length - move.IndexOf(" "));
-
-							Console.WriteLine("pong " + pong);
-						}
-						continue;
-					}
-
-					if (move.StartsWith("result"))
-					{
-						continue;
-					}
-
-					if (move.StartsWith("setboard"))
-					{
-						if (move.IndexOf(" ") > 0)
-						{
-							string fen = move.Substring(move.IndexOf(" "), move.Length - move.IndexOf(" ")).Trim();
-
-							engine.InitiateBoard(fen);
-						}
-
-						continue;
-					}
-
-					if (move.StartsWith("setboard"))
-					{
-						continue;
-					}
-					if (move.StartsWith("edit"))
-					{
-						engine.NewGame();
-						continue;
-					}
-					if (move.StartsWith("1/2-1/2"))
-					{
-						engine.NewGame();
-						continue;
-					}
-					if (move.StartsWith("0-1"))
-					{
-						engine.NewGame();
-						continue;
-					}
-					if (move.StartsWith("1-0"))
-					{
-						engine.NewGame();
-						continue;
-					}
-
-					if (move.Length < 4)
-					{
-						continue;
-					}
-
-					if (move.Length > 5)
-					{
-						continue;
-					}
-
-					string src = move.Substring(0, 2);
-					string dst = move.Substring(2, 2);
-
-
-					byte srcCol;
-					byte srcRow;
-					byte dstRow;
-					byte dstCol;
-
-					try
-					{
-						srcCol = GetColumn(src);
-						srcRow = GetRow(src);
-						dstRow = GetRow(dst);
-						dstCol = GetColumn(dst);
-					}
-					catch (Exception ex)
-					{
-						Console.WriteLine(ex.Message);
-						continue;
-					}
-
-					if (!engine.IsValidMove(srcCol, srcRow, dstCol, dstRow))
-					{
-						Console.WriteLine("Invalid Move");
-						continue;
-					}
-
-					engine.MovePiece(srcCol, srcRow, dstCol, dstRow);
-
-					MakeEngineMove(engine);
-					    
-
-					if (engine.StaleMate)
-					{
-						if (engine.InsufficientMaterial)
-						{
-							Console.WriteLine("1/2-1/2 {Draw by insufficient material}");
-						}
-						else if (engine.RepeatedMove)
-						{
-							Console.WriteLine("1/2-1/2 {Draw by repetition}");
-						}
-						else if (engine.FiftyMove)
-						{
-							Console.WriteLine("1/2-1/2 {Draw by fifty move rule}");
-						}
-						else
-						{
-							Console.WriteLine("1/2-1/2 {Stalemate}");
-						}
-						engine.NewGame();
-					}
-					else if (engine.GetWhiteMate())
-					{
-						Console.WriteLine("0-1 {Black mates}");
-						engine.NewGame();
-					}
-					else if (engine.GetBlackMate())
-					{
-						Console.WriteLine("1-0 {White mates}");
-						engine.NewGame();
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.Message);
-				return;
-			}
-		}
-	}
-
-	private static void MakeEngineMove(Engine engine)
-	{
-		DateTime start = DateTime.Now;
-
-		engine.AiPonderMove();
-
-		MoveContent lastMove = engine.GetMoveHistory().ToArray()[0];
-
-		string tmp = "";
-
-		var sourceColumn = (byte)(lastMove.MovingPiecePrimary.SrcPosition % 8);
-		var srcRow = (byte)(8 - (lastMove.MovingPiecePrimary.SrcPosition / 8));
-		var destinationColumn = (byte)(lastMove.MovingPiecePrimary.DstPosition % 8);
-		var destinationRow = (byte)(8 - (lastMove.MovingPiecePrimary.DstPosition / 8));
-
-		tmp += GetPgnMove(lastMove.MovingPiecePrimary.PieceType);
-
-		if (lastMove.MovingPiecePrimary.PieceType == ChessPieceType.Knight)
-		{
-			tmp += GetColumnFromInt(sourceColumn + 1);
-			tmp += srcRow;
-		}
-		else if (lastMove.MovingPiecePrimary.PieceType == ChessPieceType.Rook)
-		{
-			tmp += GetColumnFromInt(sourceColumn + 1);
-			tmp += srcRow;
-		}
-		else if (lastMove.MovingPiecePrimary.PieceType == ChessPieceType.Pawn)
-		{
-			if (sourceColumn != destinationColumn)
-			{
-				tmp += GetColumnFromInt(sourceColumn + 1);
-			}
-		}
-
-		if (lastMove.TakenPiece.PieceType != ChessPieceType.None)
-		{
-			tmp += "x";
-		}
-
-		tmp += GetColumnFromInt(destinationColumn + 1);
-
-		tmp += destinationRow;
-
-		if (lastMove.PawnPromotedTo == ChessPieceType.Queen)
-		{
-			tmp += "=Q";
-		}
-		else if (lastMove.PawnPromotedTo == ChessPieceType.Rook)
-		{
-			tmp += "=R";
-		}
-		else if (lastMove.PawnPromotedTo == ChessPieceType.Knight)
-		{
-			tmp += "=K";
-		}
-		else if (lastMove.PawnPromotedTo == ChessPieceType.Bishop)
-		{
-			tmp += "=B";
-		}
-
-		DateTime end = DateTime.Now;
-
-		TimeSpan ts = end - start;
-
-		Console.Write(engine.PlyDepthReached + " ");
-
-		int score = engine.GetScore();
-
-		if (score > 0)
-		{
-			score = score / 10;
-		}
-
-		Console.Write(score + " ");
-		Console.Write(ts.Seconds * 100 + " ");
-		Console.Write(engine.NodesSearched + engine.NodesQuiessence + " ");
-		Console.Write(engine.PvLine);
-		Console.WriteLine();
-
-		Console.Write("move ");
-		Console.WriteLine(tmp);
-	}
-
-	public static string GetColumnFromInt(int column)
-	{
-		string returnColumnt;
-
-		switch (column)
-		{
-			case 1:
-				returnColumnt = "a";
-				break;
-			case 2:
-				returnColumnt = "b";
-				break;
-			case 3:
-				returnColumnt = "c";
-				break;
-			case 4:
-				returnColumnt = "d";
-				break;
-			case 5:
-				returnColumnt = "e";
-				break;
-			case 6:
-				returnColumnt = "f";
-				break;
-			case 7:
-				returnColumnt = "g";
-				break;
-			case 8:
-				returnColumnt = "h";
-				break;
-			default:
-				returnColumnt = "Unknown";
-				break;
-		}
-
-		return returnColumnt;
-	}
-
-	private static string GetPgnMove(ChessPieceType pieceType)
-	{
-		string move = "";
-
-		if (pieceType == ChessPieceType.Bishop)
-		{
-			move += "B";
-		}
-		else if (pieceType == ChessPieceType.King)
-		{
-			move += "K";
-		}
-		else if (pieceType == ChessPieceType.Knight)
-		{
-			move += "N";
-		}
-		else if (pieceType == ChessPieceType.Queen)
-		{
-			move += "Q";
-		}
-		else if (pieceType == ChessPieceType.Rook)
-		{
-			move += "R";
-		}
-
-		return move;
-	}
-
-	private static byte GetRow(string move)
-	{
-		if (move != null)
-		{
-			if (move.Length == 2)
-			{
-				return (byte)(8 - int.Parse(move.Substring(1, 1).ToLower()));
-			}
-		}
-
-		return 255;
-	}
-
-	private static byte GetColumn(string move)
-	{
-		if (move != null)
-		{
-			if (move.Length == 2)
-			{
-				string col = move.Substring(0, 1).ToLower();
-
-				switch (col)
-				{
-					case "a":
-						{
-							return 0;
-						}
-					case "b":
-						{
-							return 1;
-						}
-					case "c":
-						{
-							return 2;
-						}
-					case "d":
-						{
-							return 3;
-						}
-					case "e":
-						{
-							return 4;
-						}
-					case "f":
-						{
-							return 5;
-						}
-					case "g":
-						{
-							return 6;
-						}
-					case "h":
-						{
-							return 7;
-						}
-					default:
-						return 255;
-				}
-			}
-		}
-
-		return 255;
-	}
-
-	private static void DrawBoard(Engine engine)
-	{
-		//Console.Clear();
-
-		for (byte i = 0; i < 64; i++)
-		{
-			if (i % 8 == 0)
-			{
-				Console.WriteLine();
-				Console.WriteLine(" ---------------------------------");
-				Console.Write((8 - (i / 8)));
-			}
-
-			ChessPieceType PieceType = engine.GetPieceTypeAt(i);
-			ChessPieceColor PieceColor = engine.GetPieceColorAt(i);
-			string str;
-
-			switch (PieceType)
-			{
-				case ChessPieceType.Pawn:
-					{
-						str = "| " + "P ";
-						break;
-					}
-				case ChessPieceType.Knight:
-					{
-						str = "| " + "N ";
-						break;
-					}
-				case ChessPieceType.Bishop:
-					{
-						str = "| " + "B ";
-						break;
-					}
-				case ChessPieceType.Rook:
-					{
-						str = "| " + "R ";
-						break;
-					}
-
-				case ChessPieceType.Queen:
-					{
-						str = "| " + "Q ";
-						break;
-					}
-
-				case ChessPieceType.King:
-					{
-						str = "| " + "K ";
-						break;
-					}
-				default:
-					{
-						str = "| " + "  ";
-						break;
-					}
-			}
-
-			if (PieceColor == ChessPieceColor.Black)
-			{
-				str = str.ToLower();
-			}
-
-			Console.Write(str);
-
-			if (i % 8 == 7)
-			{
-				Console.Write("|");
-			}
-		}
-
-		Console.WriteLine();
-		Console.WriteLine(" ---------------------------------");
-		Console.WriteLine("   A   B   C   D   E   F   G   H");
-
-	}
+    static readonly Engine gameEngine = new Engine();
+    static string _platform => RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "mac" :
+                               RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux" :
+                               RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "windows" : "";
+    static bool _quitGame = false;
+
+    static void Main(string[] _)
+    {
+        Console.OutputEncoding = Encoding.UTF8;
+        RunGame();
+    }
+
+    static void RunGame()
+    {
+        // init picovoice platform
+        string keywordPath = $"pico_chess_{_platform}.ppn";
+        string contextPath = $"chess_{_platform}.rhn";
+
+        using Picovoice picovoice = new Picovoice(keywordPath, WakeWordCallback, contextPath, InferenceCallback);
+
+        DrawBoard("\n");
+
+        // create and start recording
+        short[] recordingBuffer = new short[picovoice.FrameLength];
+        ALCaptureDevice captureDevice = ALC.CaptureOpenDevice(null, picovoice.SampleRate, ALFormat.Mono16, picovoice.FrameLength * 2);
+        {
+            ALC.CaptureStart(captureDevice);
+            while (!_quitGame)
+            {
+                int samplesAvailable = ALC.GetAvailableSamples(captureDevice);
+                if (samplesAvailable > picovoice.FrameLength)
+                {
+                    ALC.CaptureSamples(captureDevice, ref recordingBuffer[0], picovoice.FrameLength);
+                    picovoice.Process(recordingBuffer);
+
+                }
+                Thread.Yield();
+            }
+
+            // stop and clean up resources
+            Console.WriteLine("Bye!");
+            ALC.CaptureStop(captureDevice);
+            ALC.CaptureCloseDevice(captureDevice);
+        }
+    }
+
+    static void WakeWordCallback()
+    {
+        Console.WriteLine("\n Listening for command...");
+    }
+
+    static void InferenceCallback(Inference inference)
+    {
+        if (inference.IsUnderstood)
+        {
+            if (inference.Intent.Equals("move"))
+            {
+                if (CheckEndGame())
+                    return;
+
+                string srcSide = inference.Slots["srcSide"];
+                string srcRank = inference.Slots["srcRank"];
+                string srcFile = inference.Slots.ContainsKey("srcFile") ? inference.Slots["srcFile"] : "";
+
+                string dstSide = inference.Slots["dstSide"];
+                string dstRank = inference.Slots["dstRank"];
+                string dstFile = inference.Slots.ContainsKey("dstFile") ? inference.Slots["dstFile"] : "";
+
+                string playerMove = MakePlayerMove(srcSide, srcFile, srcRank, dstSide, dstFile, dstRank);
+                if (playerMove.Equals("Invalid Move"))
+                {
+                    DrawBoard($" {playerMove}\n");
+                    return;
+                }
+
+                string theirMove = MakeOpponentMove();
+                DrawBoard($" \u2654  {playerMove}\n \u265A  {theirMove}");
+
+                if (CheckEndGame())
+                {
+                    Console.WriteLine($"\n {GetEndGameReason()}");
+                    Console.WriteLine($" Say 'new game' to play again.");
+                }
+            }
+            else if (inference.Intent.Equals("undo"))
+            {
+                UndoLastMove();
+            }
+            else if (inference.Intent.Equals("newgame"))
+            {
+                NewGame();
+            }
+            else if (inference.Intent.Equals("quit"))
+            {
+                QuitGame();
+            }
+        }
+        else
+        {
+            DrawBoard(" Didn't understand move.\n");
+        }
+    }
+
+    static void NewGame()
+    {
+        gameEngine.NewGame();
+        DrawBoard(" New game started.\n");
+    }
+
+    static void UndoLastMove()
+    {
+        gameEngine.Undo();
+        DrawBoard(" Last move undid\n");
+    }
+
+    static void QuitGame()
+    {
+        Console.Clear();
+        _quitGame = true;
+    }
+
+
+    static string MakePlayerMove(string srcSide, string srcFile, string srcRank,
+        string dstSide, string dstFile, string dstRank)
+    {
+        byte srcCol;
+        byte srcRow;
+        byte dstRow;
+        byte dstCol;
+
+        try
+        {
+            srcCol = GetColumn(srcSide, srcFile);
+            srcRow = GetRow(srcRank);
+            dstCol = GetColumn(dstSide, dstFile);
+            dstRow = GetRow(dstRank);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return "Invalid Move";
+        }
+
+        if (!gameEngine.IsValidMove(srcCol, srcRow, dstCol, dstRow))
+        {
+            return "Invalid Move";
+        }
+
+        gameEngine.MovePiece(srcCol, srcRow, dstCol, dstRow);
+        return $"{GetColumn(srcCol)} {GetRow(srcRow)} -> {GetColumn(dstCol)} {GetRow(dstRow)}";
+    }
+
+    static string MakeOpponentMove()
+    {
+        gameEngine.AiPonderMove();
+
+        MoveContent lastMove = gameEngine.GetMoveHistory().ToArray()[0];
+
+        var srcCol = (byte)(lastMove.MovingPiecePrimary.SrcPosition % 8);
+        var srcRow = (byte)(lastMove.MovingPiecePrimary.SrcPosition / 8);
+        var dstCol = (byte)(lastMove.MovingPiecePrimary.DstPosition % 8);
+        var dstRow = (byte)(lastMove.MovingPiecePrimary.DstPosition / 8);
+
+        return $"{GetColumn(srcCol)} {GetRow(srcRow)} -> {GetColumn(dstCol)} {GetRow(dstRow)}";
+    }
+
+    static bool CheckEndGame()
+    {
+        return gameEngine.StaleMate || gameEngine.GetWhiteMate() || gameEngine.GetBlackMate();
+    }
+
+    static string GetEndGameReason()
+    {
+        if (gameEngine.StaleMate)
+        {
+            string reason;
+            if (gameEngine.InsufficientMaterial)
+            {
+                reason = "1/2-1/2 {Draw by insufficient material}";
+            }
+            else if (gameEngine.RepeatedMove)
+            {
+                reason = "1/2-1/2 {Draw by repetition}";
+            }
+            else if (gameEngine.FiftyMove)
+            {
+                reason = "1/2-1/2 {Draw by fifty move rule}";
+            }
+            else
+            {
+                reason = "1/2-1/2 {Stalemate}";
+            }
+            gameEngine.NewGame();
+            return reason;
+        }
+        else if (gameEngine.GetWhiteMate())
+        {
+            gameEngine.NewGame();
+            return "0-1 {Black mates}";
+        }
+        else if (gameEngine.GetBlackMate())
+        {
+            gameEngine.NewGame();
+            return "1-0 {White mates}";
+        }
+        else
+        {
+            return "Not end game";
+        }
+    }
+
+    static byte GetRow(string move)
+    {
+        return move switch
+        {
+            "one" => 7,
+            "two" => 6,
+            "three" => 5,
+            "four" => 4,
+            "five" => 3,
+            "six" => 2,
+            "seven" => 1,
+            "eight" => 0,
+            _ => 255
+        };
+    }
+
+    static string GetRow(byte row)
+    {
+        return row switch
+        {
+            7 => "one",
+            6 => "two",
+            5 => "three",
+            4 => "four",
+            3 => "five",
+            2 => "six",
+            1 => "seven",
+            0 => "eight",
+            _ => "?"
+        };
+    }
+
+    static string GetColumn(byte col)
+    {
+        return col switch
+        {
+            7 => "king's rook",
+            6 => "king's knight",
+            5 => "king's bishop",
+            4 => "king",
+            3 => "queen",
+            2 => "queen's bishop",
+            1 => "queen's knight",
+            0 => "queen's rook",
+            _ => "?"
+        };
+    }
+
+    static byte GetColumn(string side, string file)
+    {
+        if (side.Equals("queen") || side.Equals("queen's"))
+        {
+            if (file.Equals("rook"))
+                return 0;
+            else if (file.Equals("knight"))
+                return 1;
+            else if (file.Equals("bishop"))
+                return 2;
+            else
+                return 3;
+        }
+        else if (side.Equals("king") || side.Equals("king's"))
+        {
+            if (file.Equals("rook"))
+                return 7;
+            else if (file.Equals("knight"))
+                return 6;
+            else if (file.Equals("bishop"))
+                return 5;
+            else
+                return 4;
+        }
+        else
+        {
+            return 255;
+        }
+    }
+
+
+    static void DrawBoard(string aboveBoardMessage = null)
+    {
+        Console.Clear();
+        if (aboveBoardMessage != null)
+        {
+            Console.WriteLine(aboveBoardMessage);
+        }
+
+        for (byte i = 0; i < 64; i++)
+        {
+            if (i % 8 == 0)
+            {
+                Console.WriteLine();
+                Console.WriteLine("  ---------------------------------");
+                Console.Write(" " + (8 - (i / 8)));
+            }
+
+            ChessPieceType PieceType = gameEngine.GetPieceTypeAt(i);
+            ChessPieceColor PieceColor = gameEngine.GetPieceColorAt(i);
+            Console.Write($"| {GetPieceSymbol(PieceColor, PieceType)} ");
+
+            if (i % 8 == 7)
+            {
+                Console.Write("|");
+            }
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("  ---------------------------------  ");
+        Console.WriteLine("    QR  QN  QB  Q   K   KB  KN  KR");
+        Console.WriteLine();
+        Console.WriteLine(" Say 'PicoChess' followed by a command.\n\n Available commands are:");
+        Console.WriteLine("   - '(move) <src> (to) <dst>'");
+        Console.WriteLine("   - 'undo last move'");
+        Console.WriteLine("   - 'new game'");
+        Console.WriteLine("   - 'quit game'");
+    }
+
+    static string GetPieceSymbol(ChessPieceColor color, ChessPieceType type)
+    {
+        return color switch
+        {
+            ChessPieceColor.White => type switch
+            {
+                ChessPieceType.King => "\u2654",
+                ChessPieceType.Queen => "\u2655",
+                ChessPieceType.Rook => "\u2656",
+                ChessPieceType.Bishop => "\u2657",
+                ChessPieceType.Knight => "\u2658",
+                ChessPieceType.Pawn => "\u2659",
+                _ => " "
+            },
+            ChessPieceColor.Black => type switch
+            {
+                ChessPieceType.King => "\u265A",
+                ChessPieceType.Queen => "\u265B",
+                ChessPieceType.Rook => "\u265C",
+                ChessPieceType.Bishop => "\u265D",
+                ChessPieceType.Knight => "\u265E",
+                ChessPieceType.Pawn => "\u265F",
+                _ => " "
+            },
+            _ => " ",
+        };
+    }
 }
